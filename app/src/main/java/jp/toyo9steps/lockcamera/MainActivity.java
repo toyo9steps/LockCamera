@@ -5,15 +5,20 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Switch;
 
-public class MainActivity extends AppCompatActivity implements OnCheckedChangeListener{
+public class MainActivity extends AppCompatActivity implements OnCheckedChangeListener, OnClickListener{
 
 	private Switch mSwitchDisable;
 	private DevicePolicyManager mPolicyManger;
 	private ComponentName mAdminReceiver;
+	private Button mButtonStartTime;
+	private Button mButtonEndTime;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -22,6 +27,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
 		mSwitchDisable = (Switch) findViewById(R.id.switchDisable);
 		mSwitchDisable.setOnCheckedChangeListener(this);
+
+		mButtonStartTime = (Button) findViewById(R.id.buttonStartTime);
+		mButtonStartTime.setOnClickListener(this);
+
+		mButtonEndTime = (Button) findViewById(R.id.buttonEndTime);
+		mButtonEndTime.setOnClickListener(this);
 
 		mPolicyManger = (DevicePolicyManager) getSystemService(DEVICE_POLICY_SERVICE);
 		mAdminReceiver = new ComponentName(this, MyDeviceAdminReceiver.class);
@@ -53,5 +64,15 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
 		boolean current = mPolicyManger.getCameraDisabled(mAdminReceiver);
 		mPolicyManger.setCameraDisabled(mAdminReceiver, !current);
+	}
+
+	@Override
+	public void onClick(View v){
+		if(v == mButtonStartTime){
+			new TimePickerFragment().show(getFragmentManager(), TimePickerFragment.TAG_START_TIME);
+		}
+		else if(v == mButtonEndTime){
+			new TimePickerFragment().show(getFragmentManager(), TimePickerFragment.TAG_END_TIME);
+		}
 	}
 }
