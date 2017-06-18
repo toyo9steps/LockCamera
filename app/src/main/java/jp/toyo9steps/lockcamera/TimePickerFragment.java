@@ -31,12 +31,12 @@ public class TimePickerFragment extends DialogFragment implements OnTimeSetListe
 	@Override
 	public void onTimeSet(TimePicker view, int hourOfDay, int minute){
 		if(TAG_START_TIME.equals(getTag())){
-			Button button = (Button) getActivity().findViewById(R.id.buttonStartTime);
-			button.setText(String.valueOf(hourOfDay) + ":" + String.valueOf(minute));
+			MainActivity activity = (MainActivity) getActivity();
+			activity.setDisableStartTime(hourOfDay, minute);
 		}
 		else{
-			Button button = (Button) getActivity().findViewById(R.id.buttonEndTime);
-			button.setText(String.valueOf(hourOfDay) + ":" + String.valueOf(minute));
+			MainActivity activity = (MainActivity) getActivity();
+			activity.setDisableEndTime(hourOfDay, minute);
 		}
 	}
 }

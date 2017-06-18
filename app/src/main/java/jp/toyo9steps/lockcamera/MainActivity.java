@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 	private Switch mSwitchDisable;
 	private DevicePolicyManager mPolicyManger;
 	private ComponentName mAdminReceiver;
+	private SettingLoader mSettings;
 	private Button mButtonStartTime;
 	private Button mButtonEndTime;
 
@@ -25,14 +26,18 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
+		mSettings = new SettingLoader(this);
+
 		mSwitchDisable = (Switch) findViewById(R.id.switchDisable);
 		mSwitchDisable.setOnCheckedChangeListener(this);
 
 		mButtonStartTime = (Button) findViewById(R.id.buttonStartTime);
 		mButtonStartTime.setOnClickListener(this);
+		setDisableStartTime(mSettings.startTimeHour, mSettings.startTimeMinute);
 
 		mButtonEndTime = (Button) findViewById(R.id.buttonEndTime);
 		mButtonEndTime.setOnClickListener(this);
+		setDisableEndTime(mSettings.endTimeHour, mSettings.endTimeMinute);
 
 		mPolicyManger = (DevicePolicyManager) getSystemService(DEVICE_POLICY_SERVICE);
 		mAdminReceiver = new ComponentName(this, MyDeviceAdminReceiver.class);
@@ -74,5 +79,26 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 		else if(v == mButtonEndTime){
 			new TimePickerFragment().show(getFragmentManager(), TimePickerFragment.TAG_END_TIME);
 		}
+	}
+
+	/* TimePickerFragmentから本APIを介して、時刻が設定されたことを通知する */
+	public void setDisableStartTime(int hour, int minute) {
+		if (hour < 0 || minute < 0) {
+			return;
+		}
+		mSettings.saveStartTime(hour, minute);
+		setTimeButtonText(mButtonStartTime, hour, minute);
+	}
+
+	public void setDisableEndTime(int hour, int minute) {
+		if (hour < 0 || minute < 0) {
+			return;
+		}
+		mSettings.saveEndTime(hour, minute);
+		setTimeButtonText(mButtonEndTime, hour, minute);
+	}
+
+	private void setTimeButtonText(Button button, int hour, int minute) {
+		button.setText(String.valueOf(hour) + ":" + String.valueOf(minute));
 	}
 }
