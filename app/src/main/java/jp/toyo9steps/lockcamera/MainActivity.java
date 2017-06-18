@@ -12,6 +12,8 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Switch;
 
+import java.util.Locale;
+
 public class MainActivity extends AppCompatActivity implements OnCheckedChangeListener, OnClickListener{
 
 	private Switch mSwitchDisable;
@@ -99,6 +101,6 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 	}
 
 	private void setTimeButtonText(Button button, int hour, int minute) {
-		button.setText(String.valueOf(hour) + ":" + String.valueOf(minute));
+		button.setText(String.format(Locale.JAPAN, "%02d", hour) + ":" + String.format(Locale.JAPAN, "%02d", minute));
 	}
 }
