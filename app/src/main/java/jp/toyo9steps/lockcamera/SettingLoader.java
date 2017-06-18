@@ -48,4 +48,8 @@ public class SettingLoader {
         editor.putInt(KEY_END_TIME_MINUTE, minute);
         editor.apply();
     }
+
+    public boolean timeIsValid() {
+        return startTimeHour >= 0 && startTimeMinute >= 0 && endTimeHour >= 0 && endTimeMinute >= 0;
+    }
 }

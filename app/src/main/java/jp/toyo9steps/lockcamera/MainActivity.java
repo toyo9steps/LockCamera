@@ -1,5 +1,7 @@
 package jp.toyo9steps.lockcamera;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -12,6 +14,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Switch;
 
+import java.util.Calendar;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements OnCheckedChangeListener, OnClickListener{
@@ -65,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 	private void enableSwitch(){
 		mSwitchDisable.setEnabled(true);
 		mSwitchDisable.setChecked(mPolicyManger.getCameraDisabled(mAdminReceiver));
+		setRepeatingAlarms();/* システムにアラームを登録 */
 	}
 
 	@Override
@@ -90,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 		}
 		mSettings.saveStartTime(hour, minute);
 		setTimeButtonText(mButtonStartTime, hour, minute);
+		setRepeatingAlarms();/* システムにアラームを登録 */
 	}
 
 	public void setDisableEndTime(int hour, int minute) {
@@ -98,9 +103,35 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 		}
 		mSettings.saveEndTime(hour, minute);
 		setTimeButtonText(mButtonEndTime, hour, minute);
+		setRepeatingAlarms();/* システムにアラームを登録 */
 	}
 
 	private void setTimeButtonText(Button button, int hour, int minute) {
 		button.setText(String.format(Locale.JAPAN, "%02d", hour) + ":" + String.format(Locale.JAPAN, "%02d", minute));
+	}
+
+	private void setRepeatingAlarms() {
+		if (!mSettings.timeIsValid()) {
+			return;
+		}
+
+		setRepeatingAlarm(AlarmReceiver.REQUEST_DISABLE_START_TIME, mSettings.startTimeHour, mSettings.startTimeMinute);
+		setRepeatingAlarm(AlarmReceiver.REQUEST_DISABLE_END_TIME, mSettings.endTimeHour, mSettings.endTimeMinute);
+	}
+
+	private void setRepeatingAlarm(int requestCode, int hour, int minute) {
+		Intent intent = new Intent(this, AlarmReceiver.class);
+		intent.putExtra(AlarmReceiver.EXTRA_REQUEST_CODE, requestCode);
+		PendingIntent pending = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		Calendar calendar = Calendar.getInstance();
+		int today = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
+		int target = hour * 60 + minute;
+		if (target < today) {
+			calendar.add(Calendar.DAY_OF_MONTH, 1);
+		}
+		AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+		/* 24時間をmsecに換算する */
+		long interval = 24 * 60 * 60 * 1000;
+		alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval, pending);
 	}
 }
