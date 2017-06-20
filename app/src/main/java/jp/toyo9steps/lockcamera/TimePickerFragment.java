@@ -18,12 +18,20 @@ public class TimePickerFragment extends DialogFragment implements OnTimeSetListe
 
 	public static final String TAG_START_TIME = "TimePickerFragment.START_TIME";
 	public static final String TAG_END_TIME = "TimePickerFragment.END_TIME";
+	public static final String EXTRA_INIT_TIME_HOUR = "EXTRA_INIT_TIME_HOUR";
+	public static final String EXTRA_INIT_TIME_MINUTE = "EXTRA_INIT_TIME_MINUTE";
 
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState){
-		Calendar calendar = Calendar.getInstance();
-		int hour = calendar.get(Calendar.HOUR_OF_DAY);
-		int minute = calendar.get(Calendar.MINUTE);
+		Bundle args = getArguments();
+		int hour = args.getInt(EXTRA_INIT_TIME_HOUR, -1);
+		int minute = args.getInt(EXTRA_INIT_TIME_MINUTE, -1);
+		/* 呼び出し元から初期設定時刻がもらえなかった場合は、現在時刻を初期値として設定する */
+		if (hour < 0 || minute < 0) {
+			Calendar calendar = Calendar.getInstance();
+			hour = calendar.get(Calendar.HOUR_OF_DAY);
+			minute = calendar.get(Calendar.MINUTE);
+		}
 
 		return new TimePickerDialog(getActivity(), this, hour, minute, true);
 	}

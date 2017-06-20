@@ -80,10 +80,20 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 	@Override
 	public void onClick(View v){
 		if(v == mButtonStartTime){
-			new TimePickerFragment().show(getFragmentManager(), TimePickerFragment.TAG_START_TIME);
+			TimePickerFragment fragment = new TimePickerFragment();
+			Bundle args = new Bundle();
+			args.putInt(TimePickerFragment.EXTRA_INIT_TIME_HOUR, mSettings.startTimeHour);
+			args.putInt(TimePickerFragment.EXTRA_INIT_TIME_MINUTE, mSettings.startTimeMinute);
+			fragment.setArguments(args);
+			fragment.show(getFragmentManager(), TimePickerFragment.TAG_START_TIME);
 		}
 		else if(v == mButtonEndTime){
-			new TimePickerFragment().show(getFragmentManager(), TimePickerFragment.TAG_END_TIME);
+			TimePickerFragment fragment = new TimePickerFragment();
+			Bundle args = new Bundle();
+			args.putInt(TimePickerFragment.EXTRA_INIT_TIME_HOUR, mSettings.endTimeHour);
+			args.putInt(TimePickerFragment.EXTRA_INIT_TIME_MINUTE, mSettings.endTimeMinute);
+			fragment.setArguments(args);
+			fragment.show(getFragmentManager(), TimePickerFragment.TAG_END_TIME);
 		}
 	}
 
