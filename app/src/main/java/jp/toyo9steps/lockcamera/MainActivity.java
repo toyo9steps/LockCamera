@@ -48,13 +48,23 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 		mAdminReceiver = new ComponentName(this, MyDeviceAdminReceiver.class);
 
 		if(mPolicyManger.isAdminActive(mAdminReceiver)){
-			enableSwitch();
+			setRepeatingAlarms();/* システムにアラームを登録 */
 		}
 		else{
 			Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
 			intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mAdminReceiver);
 			intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "カメラをOFF/ONします");
 			startActivityForResult(intent, 1);
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		/* 別アプリでカメラ無効状態が変わっているかもしれないので、
+		 * アプリがフォアグラウンドに来る度に状態を取得してUIを更新する */
+		if(mPolicyManger.isAdminActive(mAdminReceiver)){
+			enableSwitch();
 		}
 	}
 
@@ -68,13 +78,11 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 	private void enableSwitch(){
 		mSwitchDisable.setEnabled(true);
 		mSwitchDisable.setChecked(mPolicyManger.getCameraDisabled(mAdminReceiver));
-		setRepeatingAlarms();/* システムにアラームを登録 */
 	}
 
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-		boolean current = mPolicyManger.getCameraDisabled(mAdminReceiver);
-		mPolicyManger.setCameraDisabled(mAdminReceiver, !current);
+		mPolicyManger.setCameraDisabled(mAdminReceiver, isChecked);
 	}
 
 	@Override
