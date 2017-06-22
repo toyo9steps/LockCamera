@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.Switch;
@@ -23,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 	private DevicePolicyManager mPolicyManger;
 	private ComponentName mAdminReceiver;
 	private SettingLoader mSettings;
+	private CheckBox mCheckAutoTimer;
 	private Button mButtonStartTime;
 	private Button mButtonEndTime;
 
@@ -36,19 +38,27 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 		mSwitchDisable = (Switch) findViewById(R.id.switchDisable);
 		mSwitchDisable.setOnCheckedChangeListener(this);
 
+		mCheckAutoTimer = (CheckBox) findViewById(R.id.checkAutoTimer);
+		mCheckAutoTimer.setOnCheckedChangeListener(this);
+		mCheckAutoTimer.setChecked(mSettings.autoTimer);
+
 		mButtonStartTime = (Button) findViewById(R.id.buttonStartTime);
 		mButtonStartTime.setOnClickListener(this);
+		mButtonStartTime.setEnabled(mSettings.autoTimer);
 		setDisableStartTime(mSettings.startTimeHour, mSettings.startTimeMinute);
 
 		mButtonEndTime = (Button) findViewById(R.id.buttonEndTime);
 		mButtonEndTime.setOnClickListener(this);
+		mButtonEndTime.setEnabled(mSettings.autoTimer);
 		setDisableEndTime(mSettings.endTimeHour, mSettings.endTimeMinute);
 
 		mPolicyManger = (DevicePolicyManager) getSystemService(DEVICE_POLICY_SERVICE);
 		mAdminReceiver = new ComponentName(this, MyDeviceAdminReceiver.class);
 
 		if(mPolicyManger.isAdminActive(mAdminReceiver)){
-			setRepeatingAlarms();/* システムにアラームを登録 */
+			if (mSettings.autoTimer) {
+				setRepeatingAlarms();/* システムにアラームを登録 */
+			}
 		}
 		else{
 			Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
@@ -82,7 +92,20 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-		mPolicyManger.setCameraDisabled(mAdminReceiver, isChecked);
+		if (buttonView == mCheckAutoTimer) {
+			mSettings.saveAutoTimer(isChecked);
+			mButtonStartTime.setEnabled(isChecked);
+			mButtonEndTime.setEnabled(isChecked);
+			if (isChecked) {
+				setRepeatingAlarms();
+			}
+			else{
+				clearRepeatingAlarms();
+			}
+		}
+		else if (buttonView == mSwitchDisable) {
+			mPolicyManger.setCameraDisabled(mAdminReceiver, isChecked);
+		}
 	}
 
 	@Override
@@ -156,5 +179,17 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 		/* 24時間をmsecに換算する */
 		long interval = 24 * 60 * 60 * 1000;
 		alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval, pending);
+	}
+
+	private void clearRepeatingAlarms() {
+		clearRepeatingAlarm(AlarmReceiver.REQUEST_DISABLE_START_TIME);
+		clearRepeatingAlarm(AlarmReceiver.REQUEST_DISABLE_END_TIME);
+	}
+
+	private void clearRepeatingAlarm(int requestCode) {
+		Intent intent = new Intent(this, AlarmReceiver.class);
+		PendingIntent pending = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+		alarm.cancel(pending);
 	}
 }
