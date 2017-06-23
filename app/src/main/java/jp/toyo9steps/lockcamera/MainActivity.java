@@ -39,8 +39,9 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 		mSwitchDisable.setOnCheckedChangeListener(this);
 
 		mCheckAutoTimer = (CheckBox) findViewById(R.id.checkAutoTimer);
-		mCheckAutoTimer.setOnCheckedChangeListener(this);
+		/* setCheckedでリスナーが呼ばれてしまうので、リスナーを設定する前に初期値を設定する */
 		mCheckAutoTimer.setChecked(mSettings.autoTimer);
+		mCheckAutoTimer.setOnCheckedChangeListener(this);
 
 		mButtonStartTime = (Button) findViewById(R.id.buttonStartTime);
 		mButtonStartTime.setOnClickListener(this);
