@@ -166,16 +166,16 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 		intent.putExtra(AlarmReceiver.EXTRA_REQUEST_CODE, requestCode);
 		PendingIntent pending = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		Calendar calendar = Calendar.getInstance();
-
-		/* 指定した時刻が今現在の時刻より前か後ろか判定し、前だったら明日の指定時刻に設定する */
-		int todayTime = calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
-		int targetTime = hour * 60 + minute;
-		if (targetTime <= todayTime) {
-			calendar.add(Calendar.DAY_OF_MONTH, 1);
-		}
+		long todayMillis = calendar.getTimeInMillis();
 		calendar.set(Calendar.HOUR_OF_DAY, hour);
 		calendar.set(Calendar.MINUTE, minute);
 		calendar.set(Calendar.SECOND, 0);
+		/* 指定した時刻が今現在の時刻より前か後ろか判定し、前だったら明日の指定時刻に設定する */
+		/* 過去を設定すると即時発火してしまうのを避けるため。 */
+		if (calendar.getTimeInMillis() <= todayMillis) {
+			calendar.add(Calendar.DAY_OF_MONTH, 1);
+		}
+
 		AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
 		/* 24時間をmsecに換算する */
 		long interval = 24 * 60 * 60 * 1000;
