@@ -1,5 +1,7 @@
 package jp.toyo9steps.lockcamera;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -15,6 +17,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     public static final String EXTRA_REQUEST_CODE = "AlarmReceiver.extra";
     public static final int REQUEST_DISABLE_START_TIME = 0;
     public static final int REQUEST_DISABLE_END_TIME = 1;
+    private static final int NOTIFICATION_ID = 1;/* 通知の識別子 */
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -27,9 +30,27 @@ public class AlarmReceiver extends BroadcastReceiver {
         int request = intent.getIntExtra(EXTRA_REQUEST_CODE, REQUEST_DISABLE_START_TIME);
         if (request == REQUEST_DISABLE_START_TIME) {
             policyManger.setCameraDisabled(adminName, true);
+            showNotification(context);
         }
         else if (request == REQUEST_DISABLE_END_TIME) {
             policyManger.setCameraDisabled(adminName, false);
+            hideNotification(context);
         }
+    }
+
+    private void showNotification(Context context) {
+        Notification.Builder builder = new Notification.Builder(context);
+        builder.setTicker("カメラ無効中です");
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        Notification notification = builder.getNotification();
+        notification.flags |= Notification.FLAG_ONGOING_EVENT;
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.cancelAll();
+        manager.notify(NOTIFICATION_ID, notification);
+    }
+
+    private void hideNotification(Context context) {
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.cancelAll();
     }
 }
