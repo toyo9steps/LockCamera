@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 	private Switch mSwitchDisable;
 	private DevicePolicyManager mPolicyManger;
 	private ComponentName mAdminReceiver;
+	private PreciseTimer mTimer;
 	private SettingLoader mSettings;
 	private CheckBox mCheckAutoTimer;
 	private Button mButtonStartTime;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 		setContentView(R.layout.main);
 
 		mSettings = new SettingLoader(this);
+		mTimer = new PreciseTimer(this);
 
 		mSwitchDisable = (Switch) findViewById(R.id.switchDisable);
 		mSwitchDisable.setOnCheckedChangeListener(this);
@@ -157,40 +159,12 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 			return;
 		}
 
-		setRepeatingAlarm(AlarmReceiver.REQUEST_DISABLE_START_TIME, mSettings.startTimeHour, mSettings.startTimeMinute);
-		setRepeatingAlarm(AlarmReceiver.REQUEST_DISABLE_END_TIME, mSettings.endTimeHour, mSettings.endTimeMinute);
-	}
-
-	private void setRepeatingAlarm(int requestCode, int hour, int minute) {
-		Intent intent = new Intent(this, AlarmReceiver.class);
-		intent.putExtra(AlarmReceiver.EXTRA_REQUEST_CODE, requestCode);
-		PendingIntent pending = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		Calendar calendar = Calendar.getInstance();
-		long todayMillis = calendar.getTimeInMillis();
-		calendar.set(Calendar.HOUR_OF_DAY, hour);
-		calendar.set(Calendar.MINUTE, minute);
-		calendar.set(Calendar.SECOND, 0);
-		/* 指定した時刻が今現在の時刻より前か後ろか判定し、前だったら明日の指定時刻に設定する */
-		/* 過去を設定すると即時発火してしまうのを避けるため。 */
-		if (calendar.getTimeInMillis() <= todayMillis) {
-			calendar.add(Calendar.DAY_OF_MONTH, 1);
-		}
-
-		AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
-		/* 24時間をmsecに換算する */
-		long interval = 24 * 60 * 60 * 1000;
-		alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), interval, pending);
+		mTimer.set(AlarmReceiver.REQUEST_DISABLE_START_TIME, mSettings.startTimeHour, mSettings.startTimeMinute);
+		mTimer.set(AlarmReceiver.REQUEST_DISABLE_END_TIME, mSettings.endTimeHour, mSettings.endTimeMinute);
 	}
 
 	private void clearRepeatingAlarms() {
-		clearRepeatingAlarm(AlarmReceiver.REQUEST_DISABLE_START_TIME);
-		clearRepeatingAlarm(AlarmReceiver.REQUEST_DISABLE_END_TIME);
-	}
-
-	private void clearRepeatingAlarm(int requestCode) {
-		Intent intent = new Intent(this, AlarmReceiver.class);
-		PendingIntent pending = PendingIntent.getBroadcast(this, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
-		alarm.cancel(pending);
+		mTimer.cancel(AlarmReceiver.REQUEST_DISABLE_START_TIME);
+		mTimer.cancel(AlarmReceiver.REQUEST_DISABLE_END_TIME);
 	}
 }
