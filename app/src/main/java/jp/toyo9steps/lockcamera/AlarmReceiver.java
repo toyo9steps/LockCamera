@@ -2,6 +2,7 @@ package jp.toyo9steps.lockcamera;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -52,10 +53,15 @@ public class AlarmReceiver extends BroadcastReceiver {
     }
 
     private void showNotification(Context context) {
-        Notification.Builder builder = new Notification.Builder(context);
-        builder.setTicker("カメラ無効中です");
-        builder.setSmallIcon(R.mipmap.ic_launcher);
-        Notification notification = builder.getNotification();
+		Intent intent = new Intent(context, MainActivity.class);
+		PendingIntent pending = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		Notification.Builder builder = new Notification.Builder(context);
+		builder.setTicker("カメラ無効中です");
+		builder.setContentText("カメラ無効中です");
+		builder.setContentIntent(pending);
+		builder.setWhen(System.currentTimeMillis());
+		builder.setSmallIcon(R.mipmap.ic_launcher);
+		Notification notification = builder.getNotification();
         notification.flags |= Notification.FLAG_ONGOING_EVENT;
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         manager.cancelAll();
