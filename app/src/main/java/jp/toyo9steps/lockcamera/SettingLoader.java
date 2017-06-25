@@ -11,15 +11,17 @@ import android.content.SharedPreferences.Editor;
 
 public class SettingLoader {
 
-    private static final String SHARED_PREFS_NAME = "settings";
-	private static final String KEY_AUTO_TIMER = "KEY_AUTO_TIMER";
-    private static final String KEY_START_TIME_HOUR = "KEY_START_TIME_HOUR";
-    private static final String KEY_START_TIME_MINUTE = "KEY_START_TIME_MINUTE";
-    private static final String KEY_END_TIME_HOUR = "KEY_END_TIME_HOUR";
-    private static final String KEY_END_TIME_MINUTE = "KEY_END_TIME_MINUTE";
+	private static final String SHARED_PREFS_NAME = "settings";
+	private static final String KEY_SETTING_MODE = "KEY_SETTING_MODE";
+	private static final String KEY_START_TIME_HOUR = "KEY_START_TIME_HOUR";
+	private static final String KEY_START_TIME_MINUTE = "KEY_START_TIME_MINUTE";
+	private static final String KEY_END_TIME_HOUR = "KEY_END_TIME_HOUR";
+	private static final String KEY_END_TIME_MINUTE = "KEY_END_TIME_MINUTE";
+	public static final int SETTING_MODE_MANUAL = 0;
+	public static final int SETTING_MODE_TIMER = 1;
 
     private SharedPreferences mPrefs;
-	public boolean autoTimer;
+	public int settingMode;
     public int startTimeHour;
     public int startTimeMinute;
     public int endTimeHour;
@@ -27,16 +29,16 @@ public class SettingLoader {
 
     public SettingLoader(Context context) {
         mPrefs = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
-        startTimeHour = mPrefs.getInt(KEY_START_TIME_HOUR, -1);
+		settingMode = mPrefs.getInt(KEY_SETTING_MODE, SETTING_MODE_MANUAL);
+		startTimeHour = mPrefs.getInt(KEY_START_TIME_HOUR, -1);
         startTimeMinute = mPrefs.getInt(KEY_START_TIME_MINUTE, -1);
         endTimeHour = mPrefs.getInt(KEY_END_TIME_HOUR, -1);
         endTimeMinute = mPrefs.getInt(KEY_END_TIME_MINUTE, -1);
-		autoTimer = mPrefs.getBoolean(KEY_AUTO_TIMER, false);
 	}
 
-	public void saveAutoTimer(boolean value) {
-		autoTimer = value;
-		mPrefs.edit().putBoolean(KEY_AUTO_TIMER, value).apply();
+	public void saveSettingMode(int mode) {
+		settingMode = mode;
+		mPrefs.edit().putInt(KEY_SETTING_MODE, mode).apply();
 	}
 
     public void saveStartTime(int hour, int minute) {

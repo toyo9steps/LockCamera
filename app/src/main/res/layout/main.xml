@@ -8,44 +8,60 @@
 	android:paddingBottom="10dp"
 	android:paddingLeft="10dp">
 
-	<Switch
-		android:id="@+id/switchDisable"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:text="カメラを無効にする"
-		android:enabled="false"
-		android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-	<CheckBox
-		android:id="@+id/checkAutoTimer"
+	<RadioGroup
+		android:id="@+id/radioGroup"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:text="指定時間の間、自動的に無効にする（バグってるかも）"
-		android:layout_marginTop="20dp"/>
+		android:layout_height="match_parent">
 
-	<LinearLayout
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:orientation="horizontal">
-
-		<Button
-			android:id="@+id/buttonStartTime"
+		<RadioButton
+			android:id="@+id/radioManual"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="開始時刻"/>
+			android:text="手動で無効にする"/>
 
-		<TextView
-			android:id="@+id/textView"
+		<Switch
+			android:id="@+id/switchDisable"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="～"/>
+			android:layout_marginLeft="20dp"
+			android:enabled="false"
+			android:text="カメラを無効にする"
+			android:textAppearance="?android:attr/textAppearanceMedium"/>
 
-		<Button
-			android:id="@+id/buttonEndTime"
+		<RadioButton
+			android:id="@+id/radioTimeer"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="終了時刻"/>
+			android:layout_marginTop="20dp"
+			android:text="時間指定で無効にする（バグってるかも）"/>
 
-	</LinearLayout>
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="20dp"
+			android:orientation="horizontal">
+
+			<Button
+				android:id="@+id/buttonStartTime"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:enabled="false"
+				android:text="開始時刻"/>
+
+			<TextView
+				android:id="@+id/textView"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="～"/>
+
+			<Button
+				android:id="@+id/buttonEndTime"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:enabled="false"
+				android:text="終了時刻"/>
+
+		</LinearLayout>
+	</RadioGroup>
 
 </LinearLayout>

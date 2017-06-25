@@ -1,31 +1,30 @@
 package jp.toyo9steps.lockcamera;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.RadioGroup;
 import android.widget.Switch;
 
-import java.util.Calendar;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements OnCheckedChangeListener, OnClickListener{
+public class MainActivity extends AppCompatActivity
+		implements CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener, OnClickListener{
 
 	private Switch mSwitchDisable;
 	private DevicePolicyManager mPolicyManger;
 	private ComponentName mAdminReceiver;
 	private PreciseTimer mTimer;
 	private SettingLoader mSettings;
-	private CheckBox mCheckAutoTimer;
+	private RadioGroup mRadioGroup;
 	private Button mButtonStartTime;
 	private Button mButtonEndTime;
 
@@ -40,28 +39,24 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 		mSwitchDisable = (Switch) findViewById(R.id.switchDisable);
 		mSwitchDisable.setOnCheckedChangeListener(this);
 
-		mCheckAutoTimer = (CheckBox) findViewById(R.id.checkAutoTimer);
+		mRadioGroup = (RadioGroup) findViewById(R.id.radioGroup);
 		/* setCheckedでリスナーが呼ばれてしまうので、リスナーを設定する前に初期値を設定する */
-		mCheckAutoTimer.setChecked(mSettings.autoTimer);
-		mCheckAutoTimer.setOnCheckedChangeListener(this);
+		initRadioGroup(mSettings.settingMode);
+		mRadioGroup.setOnCheckedChangeListener(this);
 
 		mButtonStartTime = (Button) findViewById(R.id.buttonStartTime);
 		mButtonStartTime.setOnClickListener(this);
-		mButtonStartTime.setEnabled(mSettings.autoTimer);
 		setDisableStartTime(mSettings.startTimeHour, mSettings.startTimeMinute);
 
 		mButtonEndTime = (Button) findViewById(R.id.buttonEndTime);
 		mButtonEndTime.setOnClickListener(this);
-		mButtonEndTime.setEnabled(mSettings.autoTimer);
 		setDisableEndTime(mSettings.endTimeHour, mSettings.endTimeMinute);
 
 		mPolicyManger = (DevicePolicyManager) getSystemService(DEVICE_POLICY_SERVICE);
 		mAdminReceiver = new ComponentName(this, MyDeviceAdminReceiver.class);
 
 		if(mPolicyManger.isAdminActive(mAdminReceiver)){
-			if (mSettings.autoTimer) {
-				setRepeatingAlarms();/* システムにアラームを登録 */
-			}
+			setRadioButtonItems(mSettings.settingMode);
 		}
 		else{
 			Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
@@ -93,20 +88,45 @@ public class MainActivity extends AppCompatActivity implements OnCheckedChangeLi
 		mSwitchDisable.setChecked(mPolicyManger.getCameraDisabled(mAdminReceiver));
 	}
 
+	private void initRadioGroup(int settingMode){
+		if(settingMode == SettingLoader.SETTING_MODE_MANUAL){
+			mRadioGroup.check(R.id.radioManual);
+		}
+		else if(settingMode == SettingLoader.SETTING_MODE_TIMER){
+			mRadioGroup.check(R.id.radioTimeer);
+		}
+	}
+
+	private void setRadioButtonItems(int resActive){
+		if(resActive == R.id.radioManual){
+			mSettings.saveSettingMode(SettingLoader.SETTING_MODE_MANUAL);
+			mSwitchDisable.setEnabled(true);
+		}
+		else{
+			mSwitchDisable.setEnabled(false);
+		}
+
+		if(resActive == R.id.radioTimeer){
+			mSettings.saveSettingMode(SettingLoader.SETTING_MODE_TIMER);
+			setRepeatingAlarms();
+			mButtonStartTime.setEnabled(true);
+			mButtonEndTime.setEnabled(true);
+		}
+		else{
+			clearRepeatingAlarms();
+			mButtonStartTime.setEnabled(false);
+			mButtonEndTime.setEnabled(false);
+		}
+	}
+
+	@Override
+	public void onCheckedChanged(RadioGroup radioGroup, @IdRes int id){
+		setRadioButtonItems(id);
+	}
+
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
-		if (buttonView == mCheckAutoTimer) {
-			mSettings.saveAutoTimer(isChecked);
-			mButtonStartTime.setEnabled(isChecked);
-			mButtonEndTime.setEnabled(isChecked);
-			if (isChecked) {
-				setRepeatingAlarms();
-			}
-			else{
-				clearRepeatingAlarms();
-			}
-		}
-		else if (buttonView == mSwitchDisable) {
+		if (buttonView == mSwitchDisable) {
 			mPolicyManger.setCameraDisabled(mAdminReceiver, isChecked);
 		}
 	}
