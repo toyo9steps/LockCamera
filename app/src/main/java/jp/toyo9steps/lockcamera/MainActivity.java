@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity
 
 		mSettings = new SettingLoader(this);
 		mTimer = new PreciseTimer(this);
+		mCameraManager = new CameraManager(this);
 
 		mSwitchDisable = (Switch) findViewById(R.id.switchDisable);
 		mSwitchDisable.setOnCheckedChangeListener(this);
@@ -46,8 +47,6 @@ public class MainActivity extends AppCompatActivity
 		mButtonEndTime = (Button) findViewById(R.id.buttonEndTime);
 		mButtonEndTime.setOnClickListener(this);
 		setDisableEndTime(mSettings.endTimeHour, mSettings.endTimeMinute);
-
-		mCameraManager = new CameraManager(this);
 
 		if(mCameraManager.isAdminActive()){
 			setRadioButtonItems(mSettings.settingMode, true);
@@ -102,7 +101,7 @@ public class MainActivity extends AppCompatActivity
 			if(checkRadio){
 				mRadioGroup.check(R.id.radioTimeer);
 			}
-			setRepeatingAlarms();
+			setRepeatingAlarms(mSettings, mTimer, mCameraManager);
 			mButtonStartTime.setEnabled(true);
 			mButtonEndTime.setEnabled(true);
 		}
@@ -159,7 +158,7 @@ public class MainActivity extends AppCompatActivity
 		mSettings.saveStartTime(hour, minute);
 		setTimeButtonText(mButtonStartTime, hour, minute);
 		if(mSettings.settingMode == SettingLoader.SETTING_MODE_TIMER){
-			setRepeatingAlarms();/* システムにアラームを登録 */
+			setRepeatingAlarms(mSettings, mTimer, mCameraManager);/* システムにアラームを登録 */
 		}
 	}
 
@@ -171,7 +170,7 @@ public class MainActivity extends AppCompatActivity
 		mSettings.saveEndTime(hour, minute);
 		setTimeButtonText(mButtonEndTime, hour, minute);
 		if(mSettings.settingMode == SettingLoader.SETTING_MODE_TIMER){
-			setRepeatingAlarms();/* システムにアラームを登録 */
+			setRepeatingAlarms(mSettings, mTimer, mCameraManager);/* システムにアラームを登録 */
 		}
 	}
 
@@ -179,18 +178,18 @@ public class MainActivity extends AppCompatActivity
 		button.setText(String.format(Locale.JAPAN, "%02d", hour) + ":" + String.format(Locale.JAPAN, "%02d", minute));
 	}
 
-	private void setRepeatingAlarms() {
-		if (!mSettings.timeIsValid()) {
+	public static void setRepeatingAlarms(SettingLoader settings, PreciseTimer timer, CameraManager cameraManager) {
+		if (!settings.timeIsValid()) {
 			return;
 		}
 
 		/* タイマーを設定すると同時に、タイマーが明日に設定された否かを取得する */
-		boolean startTommorow = mTimer.set(AlarmReceiver.REQUEST_DISABLE_START_TIME, mSettings.startTimeHour, mSettings.startTimeMinute);
-		boolean endTommorow = mTimer.set(AlarmReceiver.REQUEST_DISABLE_END_TIME, mSettings.endTimeHour, mSettings.endTimeMinute);
+		boolean startTommorow = timer.set(AlarmReceiver.REQUEST_DISABLE_START_TIME, settings.startTimeHour, settings.startTimeMinute);
+		boolean endTommorow = timer.set(AlarmReceiver.REQUEST_DISABLE_END_TIME, settings.endTimeHour, settings.endTimeMinute);
 
 		/* 現在時刻が開始時刻よりも遅く、終了時刻よりも前ならば即座にカメラを無効化する */
 		if(startTommorow && !endTommorow){
-			mCameraManager.setDisabled(true);
+			cameraManager.setDisabled(true);
 		}
 	}
 
