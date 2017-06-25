@@ -40,8 +40,6 @@ public class MainActivity extends AppCompatActivity
 		mSwitchDisable.setOnCheckedChangeListener(this);
 
 		mRadioGroup = (RadioGroup) findViewById(R.id.radioGroup);
-		/* setCheckedでリスナーが呼ばれてしまうので、リスナーを設定する前に初期値を設定する */
-		initRadioGroup(mSettings.settingMode);
 		mRadioGroup.setOnCheckedChangeListener(this);
 
 		mButtonStartTime = (Button) findViewById(R.id.buttonStartTime);
@@ -56,7 +54,7 @@ public class MainActivity extends AppCompatActivity
 		mAdminReceiver = new ComponentName(this, MyDeviceAdminReceiver.class);
 
 		if(mPolicyManger.isAdminActive(mAdminReceiver)){
-			setRadioButtonItems(mSettings.settingMode);
+			setRadioButtonItems(mSettings.settingMode, true);
 		}
 		else{
 			Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
@@ -72,42 +70,42 @@ public class MainActivity extends AppCompatActivity
 		/* 別アプリでカメラ無効状態が変わっているかもしれないので、
 		 * アプリがフォアグラウンドに来る度に状態を取得してUIを更新する */
 		if(mPolicyManger.isAdminActive(mAdminReceiver)){
-			enableSwitch();
+			setRadioButtonItems(mSettings.settingMode, false);
 		}
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data){
 		if(resultCode == RESULT_OK){
-			enableSwitch();
+			setRadioButtonItems(mSettings.settingMode, true);
 		}
 	}
 
-	private void enableSwitch(){
-		mSwitchDisable.setEnabled(true);
-		mSwitchDisable.setChecked(mPolicyManger.getCameraDisabled(mAdminReceiver));
-	}
-
-	private void initRadioGroup(int settingMode){
+	private void setRadioButtonItems(int settingMode, boolean checkRadio){
 		if(settingMode == SettingLoader.SETTING_MODE_MANUAL){
-			mRadioGroup.check(R.id.radioManual);
-		}
-		else if(settingMode == SettingLoader.SETTING_MODE_TIMER){
-			mRadioGroup.check(R.id.radioTimeer);
-		}
-	}
+			if(checkRadio){
+				mRadioGroup.check(R.id.radioManual);
+			}
 
-	private void setRadioButtonItems(int resActive){
-		if(resActive == R.id.radioManual){
-			mSettings.saveSettingMode(SettingLoader.SETTING_MODE_MANUAL);
 			mSwitchDisable.setEnabled(true);
+			/* setCheckedでリスナーが呼ばれてしまうので、リスナーを一旦解除する */
+			mSwitchDisable.setOnCheckedChangeListener(null);
+			mSwitchDisable.setChecked(mPolicyManger.getCameraDisabled(mAdminReceiver));
+			mSwitchDisable.setOnCheckedChangeListener(this);
 		}
 		else{
 			mSwitchDisable.setEnabled(false);
+			mPolicyManger.setCameraDisabled(mAdminReceiver, false);
+			/* setCheckedでリスナーが呼ばれてしまうので、リスナーを一旦解除する */
+			mSwitchDisable.setOnCheckedChangeListener(null);
+			mSwitchDisable.setChecked(false);
+			mSwitchDisable.setOnCheckedChangeListener(this);
 		}
 
-		if(resActive == R.id.radioTimeer){
-			mSettings.saveSettingMode(SettingLoader.SETTING_MODE_TIMER);
+		if(settingMode == SettingLoader.SETTING_MODE_TIMER){
+			if(checkRadio){
+				mRadioGroup.check(R.id.radioTimeer);
+			}
 			setRepeatingAlarms();
 			mButtonStartTime.setEnabled(true);
 			mButtonEndTime.setEnabled(true);
@@ -121,7 +119,13 @@ public class MainActivity extends AppCompatActivity
 
 	@Override
 	public void onCheckedChanged(RadioGroup radioGroup, @IdRes int id){
-		setRadioButtonItems(id);
+		if(id == R.id.radioManual){
+			mSettings.saveSettingMode(SettingLoader.SETTING_MODE_MANUAL);
+		}
+		else if(id == R.id.radioTimeer){
+			mSettings.saveSettingMode(SettingLoader.SETTING_MODE_TIMER);
+		}
+		setRadioButtonItems(mSettings.settingMode, false);
 	}
 
 	@Override
@@ -158,16 +162,21 @@ public class MainActivity extends AppCompatActivity
 		}
 		mSettings.saveStartTime(hour, minute);
 		setTimeButtonText(mButtonStartTime, hour, minute);
-		setRepeatingAlarms();/* システムにアラームを登録 */
+		if(mSettings.settingMode == SettingLoader.SETTING_MODE_TIMER){
+			setRepeatingAlarms();/* システムにアラームを登録 */
+		}
 	}
 
+	/* TimePickerFragmentから本APIを介して、時刻が設定されたことを通知する */
 	public void setDisableEndTime(int hour, int minute) {
 		if (hour < 0 || minute < 0) {
 			return;
 		}
 		mSettings.saveEndTime(hour, minute);
 		setTimeButtonText(mButtonEndTime, hour, minute);
-		setRepeatingAlarms();/* システムにアラームを登録 */
+		if(mSettings.settingMode == SettingLoader.SETTING_MODE_TIMER){
+			setRepeatingAlarms();/* システムにアラームを登録 */
+		}
 	}
 
 	private void setTimeButtonText(Button button, int hour, int minute) {
