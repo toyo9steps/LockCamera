@@ -39,6 +39,10 @@ public class CameraManager{
 	}
 
 	public void setDisabled(boolean disabled){
+		/* 権限をチェックしてからカメラを無効化する */
+		if(!isAdminActive()){
+			return;
+		}
 		mPolicyManager.setCameraDisabled(mAdminReceiver, disabled);
 		if(disabled){
 			showNotification(mContext);
