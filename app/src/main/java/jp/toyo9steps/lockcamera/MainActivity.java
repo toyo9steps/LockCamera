@@ -1,7 +1,6 @@
 package jp.toyo9steps.lockcamera;
 
 import android.app.admin.DevicePolicyManager;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
@@ -9,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 import android.widget.Switch;
@@ -20,8 +18,7 @@ public class MainActivity extends AppCompatActivity
 		implements CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener, OnClickListener{
 
 	private Switch mSwitchDisable;
-	private DevicePolicyManager mPolicyManger;
-	private ComponentName mAdminReceiver;
+	private CameraManager mCameraManager;
 	private PreciseTimer mTimer;
 	private SettingLoader mSettings;
 	private RadioGroup mRadioGroup;
@@ -50,15 +47,14 @@ public class MainActivity extends AppCompatActivity
 		mButtonEndTime.setOnClickListener(this);
 		setDisableEndTime(mSettings.endTimeHour, mSettings.endTimeMinute);
 
-		mPolicyManger = (DevicePolicyManager) getSystemService(DEVICE_POLICY_SERVICE);
-		mAdminReceiver = new ComponentName(this, MyDeviceAdminReceiver.class);
+		mCameraManager = new CameraManager(this);
 
-		if(mPolicyManger.isAdminActive(mAdminReceiver)){
+		if(mCameraManager.isAdminActive()){
 			setRadioButtonItems(mSettings.settingMode, true);
 		}
 		else{
 			Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-			intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mAdminReceiver);
+			intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mCameraManager.getAdminComponent());
 			intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "カメラをOFF/ONします");
 			startActivityForResult(intent, 1);
 		}
@@ -69,7 +65,7 @@ public class MainActivity extends AppCompatActivity
 		super.onResume();
 		/* 別アプリでカメラ無効状態が変わっているかもしれないので、
 		 * アプリがフォアグラウンドに来る度に状態を取得してUIを更新する */
-		if(mPolicyManger.isAdminActive(mAdminReceiver)){
+		if(mCameraManager.isAdminActive()){
 			setRadioButtonItems(mSettings.settingMode, false);
 		}
 	}
@@ -90,12 +86,12 @@ public class MainActivity extends AppCompatActivity
 			mSwitchDisable.setEnabled(true);
 			/* setCheckedでリスナーが呼ばれてしまうので、リスナーを一旦解除する */
 			mSwitchDisable.setOnCheckedChangeListener(null);
-			mSwitchDisable.setChecked(mPolicyManger.getCameraDisabled(mAdminReceiver));
+			mSwitchDisable.setChecked(mCameraManager.getDisabled());
 			mSwitchDisable.setOnCheckedChangeListener(this);
 		}
 		else{
 			mSwitchDisable.setEnabled(false);
-			mPolicyManger.setCameraDisabled(mAdminReceiver, false);
+			mCameraManager.setDisabled(false);
 			/* setCheckedでリスナーが呼ばれてしまうので、リスナーを一旦解除する */
 			mSwitchDisable.setOnCheckedChangeListener(null);
 			mSwitchDisable.setChecked(false);
@@ -131,7 +127,7 @@ public class MainActivity extends AppCompatActivity
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
 		if (buttonView == mSwitchDisable) {
-			mPolicyManger.setCameraDisabled(mAdminReceiver, isChecked);
+			mCameraManager.setDisabled(isChecked);
 		}
 	}
 

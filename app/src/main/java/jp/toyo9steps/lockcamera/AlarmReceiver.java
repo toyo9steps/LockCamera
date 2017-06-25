@@ -20,13 +20,11 @@ public class AlarmReceiver extends BroadcastReceiver {
     public static final String EXTRA_TIME_MINUTE = "AlarmReceiver.extra.TIME_MINUTE";
     public static final int REQUEST_DISABLE_START_TIME = 0;
     public static final int REQUEST_DISABLE_END_TIME = 1;
-    private static final int NOTIFICATION_ID = 1;/* 通知の識別子 */
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        DevicePolicyManager policyManger = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        ComponentName adminName = new ComponentName(context, MyDeviceAdminReceiver.class);
-        if(!policyManger.isAdminActive(adminName)){
+		CameraManager cameraManager = new CameraManager(context);
+		if(!cameraManager.isAdminActive()){
             return;
         }
 
@@ -39,37 +37,14 @@ public class AlarmReceiver extends BroadcastReceiver {
 		}
 
 		if(request == REQUEST_DISABLE_START_TIME){
-            policyManger.setCameraDisabled(adminName, true);
-            showNotification(context);
+			cameraManager.setDisabled(true);
 			/* 次のタイマーを設定 */
 			timer.set(request, hour, minute, true);
         }
         else if(request == REQUEST_DISABLE_END_TIME){
-            policyManger.setCameraDisabled(adminName, false);
-            hideNotification(context);
+			cameraManager.setDisabled(false);
 			/* 次のタイマーを設定 */
 			timer.set(request, hour, minute, true);
         }
-    }
-
-    private void showNotification(Context context) {
-		Intent intent = new Intent(context, MainActivity.class);
-		PendingIntent pending = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		Notification.Builder builder = new Notification.Builder(context);
-		builder.setTicker("カメラ無効中です");
-		builder.setContentText("カメラ無効中です");
-		builder.setContentIntent(pending);
-		builder.setWhen(System.currentTimeMillis());
-		builder.setSmallIcon(R.mipmap.ic_launcher);
-		Notification notification = builder.getNotification();
-        notification.flags |= Notification.FLAG_ONGOING_EVENT;
-        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.cancelAll();
-        manager.notify(NOTIFICATION_ID, notification);
-    }
-
-    private void hideNotification(Context context) {
-        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        manager.cancelAll();
     }
 }
