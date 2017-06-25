@@ -41,12 +41,12 @@ public class PreciseTimer {
 		mAlarm.cancel(operation);
 	}
 
-	public void set(int requestCode, int hour, int minute){
-		set(requestCode, hour, minute, false);
+	public boolean set(int requestCode, int hour, int minute){
+		return set(requestCode, hour, minute, false);
 	}
 
 	/* フラグtommorowをtrueに設定すると、必ず日付が明日に設定される */
-	public void set(int requestCode, int hour, int minute, boolean tomorrow){
+	public boolean set(int requestCode, int hour, int minute, boolean tomorrow){
 		Intent intent = new Intent(mContext, AlarmReceiver.class);
 		intent.putExtra(AlarmReceiver.EXTRA_REQUEST_CODE, requestCode);
 		intent.putExtra(AlarmReceiver.EXTRA_TIME_HOUR, hour);
@@ -59,10 +59,15 @@ public class PreciseTimer {
 		calendar.set(Calendar.SECOND, 0);
 		/* 指定した時刻が今現在の時刻より前か後ろか判定し、前だったら明日の指定時刻に設定する */
 		/* 過去を設定すると即時発火してしまうのを避けるため。 */
+		boolean ret = false;
 		if (tomorrow || calendar.getTimeInMillis() <= todayMillis) {
 			calendar.add(Calendar.DAY_OF_MONTH, 1);
+			ret = true;
 		}
 		set(calendar.getTimeInMillis(), pending);
+
+		/* 戻り値は明日にタイマーが設定されたらtrue, 今日にタイマーが設定されたらfalseを返す */
+		return ret;
 	}
 
 	public void cancel(int requestCode) {

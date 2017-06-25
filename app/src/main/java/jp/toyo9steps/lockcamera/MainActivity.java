@@ -184,8 +184,14 @@ public class MainActivity extends AppCompatActivity
 			return;
 		}
 
-		mTimer.set(AlarmReceiver.REQUEST_DISABLE_START_TIME, mSettings.startTimeHour, mSettings.startTimeMinute);
-		mTimer.set(AlarmReceiver.REQUEST_DISABLE_END_TIME, mSettings.endTimeHour, mSettings.endTimeMinute);
+		/* タイマーを設定すると同時に、タイマーが明日に設定された否かを取得する */
+		boolean startTommorow = mTimer.set(AlarmReceiver.REQUEST_DISABLE_START_TIME, mSettings.startTimeHour, mSettings.startTimeMinute);
+		boolean endTommorow = mTimer.set(AlarmReceiver.REQUEST_DISABLE_END_TIME, mSettings.endTimeHour, mSettings.endTimeMinute);
+
+		/* 現在時刻が開始時刻よりも遅く、終了時刻よりも前ならば即座にカメラを無効化する */
+		if(startTommorow && !endTommorow){
+			mCameraManager.setDisabled(true);
+		}
 	}
 
 	private void clearRepeatingAlarms() {
