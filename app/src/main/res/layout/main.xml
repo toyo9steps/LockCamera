@@ -62,6 +62,79 @@
 				android:text="終了時刻"/>
 
 		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:layout_marginLeft="20dp"
+			android:layout_marginTop="10dp"
+			android:orientation="horizontal">
+
+			<ToggleButton
+				android:id="@+id/toggleSunday"
+				style="@style/FlatToggleButton"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:gravity="center"
+				android:textOff="日"
+				android:textOn="日"/>
+
+			<ToggleButton
+				android:id="@+id/toggleMonday"
+				style="@style/FlatToggleButton"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:gravity="center"
+				android:textOff="月"
+				android:textOn="月"/>
+
+			<ToggleButton
+				android:id="@+id/toggleTuesday"
+				style="@style/FlatToggleButton"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:gravity="center"
+				android:textOff="火"
+				android:textOn="火"/>
+
+			<ToggleButton
+				android:id="@+id/toggleWednesday"
+				style="@style/FlatToggleButton"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:gravity="center"
+				android:textOff="水"
+				android:textOn="水"/>
+
+			<ToggleButton
+				android:id="@+id/toggleThursday"
+				style="@style/FlatToggleButton"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:gravity="center"
+				android:textOff="木"
+				android:textOn="木"/>
+
+			<ToggleButton
+				android:id="@+id/toggleFriday"
+				style="@style/FlatToggleButton"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:gravity="center"
+				android:textOff="金"
+				android:textOn="金"/>
+
+			<ToggleButton
+				android:id="@+id/toggleSaturday"
+				style="@style/FlatToggleButton"
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:gravity="center"
+				android:textOff="土"
+				android:textOn="土"/>
+
+		</LinearLayout>
+
 	</RadioGroup>
 
 </LinearLayout>
