@@ -6,4 +6,5 @@
 
 	<color name="pink">#ff4081</color>
 	<color name="transparent">#00000000</color>
+	<color name="gray">#cccccc</color>
 </resources>
