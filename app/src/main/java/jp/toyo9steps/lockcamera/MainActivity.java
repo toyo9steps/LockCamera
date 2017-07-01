@@ -11,12 +11,20 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 import android.widget.Switch;
+import android.widget.ToggleButton;
 
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
 		implements CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener, OnClickListener{
 
+	private static final int DOW_INDEX_SUNDAY = 0;
+	private static final int DOW_INDEX_MONDAY = 1;
+	private static final int DOW_INDEX_TUESDAY = 2;
+	private static final int DOW_INDEX_WEDNESDAY = 3;
+	private static final int DOW_INDEX_THURSDAY = 4;
+	private static final int DOW_INDEX_FRIDAY = 5;
+	private static final int DOW_INDEX_SATURDAY = 6;
 	private Switch mSwitchDisable;
 	private CameraManager mCameraManager;
 	private PreciseTimer mTimer;
@@ -24,6 +32,7 @@ public class MainActivity extends AppCompatActivity
 	private RadioGroup mRadioGroup;
 	private Button mButtonStartTime;
 	private Button mButtonEndTime;
+	private ToggleButton[] mToggleDows;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -47,6 +56,26 @@ public class MainActivity extends AppCompatActivity
 		mButtonEndTime = (Button) findViewById(R.id.buttonEndTime);
 		mButtonEndTime.setOnClickListener(this);
 		setDisableEndTime(mSettings.endTimeHour, mSettings.endTimeMinute);
+
+		mToggleDows = new ToggleButton[7];
+		mToggleDows[DOW_INDEX_SUNDAY] = (ToggleButton) findViewById(R.id.toggleSunday);
+		mToggleDows[DOW_INDEX_MONDAY] = (ToggleButton) findViewById(R.id.toggleMonday);
+		mToggleDows[DOW_INDEX_TUESDAY] = (ToggleButton) findViewById(R.id.toggleTuesday);
+		mToggleDows[DOW_INDEX_WEDNESDAY] = (ToggleButton) findViewById(R.id.toggleWednesday);
+		mToggleDows[DOW_INDEX_THURSDAY] = (ToggleButton) findViewById(R.id.toggleThursday);
+		mToggleDows[DOW_INDEX_FRIDAY] = (ToggleButton) findViewById(R.id.toggleFriday);
+		mToggleDows[DOW_INDEX_SATURDAY] = (ToggleButton) findViewById(R.id.toggleSaturday);
+		for(ToggleButton toggleDow : mToggleDows){
+			toggleDow.setOnCheckedChangeListener(this);
+		}
+		mToggleDows[DOW_INDEX_SUNDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_SUNDAY) != 0);
+		mToggleDows[DOW_INDEX_MONDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_MONDAY) != 0);
+		mToggleDows[DOW_INDEX_TUESDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_TUESDAY) != 0);
+		mToggleDows[DOW_INDEX_WEDNESDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_WEDNESDAY) != 0);
+		mToggleDows[DOW_INDEX_THURSDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_THURSDAY) != 0);
+		mToggleDows[DOW_INDEX_FRIDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_FRYDAY) != 0);
+		mToggleDows[DOW_INDEX_SATURDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_SATURDAY) != 0);
+
 
 		if(mCameraManager.isAdminActive()){
 			setRadioButtonItems(mSettings.settingMode, true);
@@ -104,11 +133,17 @@ public class MainActivity extends AppCompatActivity
 			setRepeatingAlarms(mSettings, mTimer, mCameraManager);
 			mButtonStartTime.setEnabled(true);
 			mButtonEndTime.setEnabled(true);
+			for(ToggleButton toggleDow : mToggleDows){
+				toggleDow.setEnabled(true);
+			}
 		}
 		else{
 			clearRepeatingAlarms();
 			mButtonStartTime.setEnabled(false);
 			mButtonEndTime.setEnabled(false);
+			for(ToggleButton toggleDow : mToggleDows){
+				toggleDow.setEnabled(false);
+			}
 		}
 	}
 
@@ -127,6 +162,17 @@ public class MainActivity extends AppCompatActivity
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
 		if (buttonView == mSwitchDisable) {
 			mCameraManager.setDisabled(isChecked);
+		}
+		for(int i = 0; i < mToggleDows.length; i++){
+			if(mToggleDows[i] == buttonView){
+				int bitVal = 0x0001 << i;
+				if(isChecked){
+					mSettings.saveTimerDow(mSettings.timerDow | bitVal);
+				}
+				else{
+					mSettings.saveTimerDow(mSettings.timerDow & ~bitVal);
+				}
+			}
 		}
 	}
 
