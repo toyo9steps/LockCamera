@@ -45,7 +45,7 @@ public class PreciseTimer {
 		return set(requestCode, hour, minute, false, dowBits);
 	}
 
-	/* フラグtommorowをtrueに設定すると、必ず日付が明日に設定される */
+	/* フラグtomorrowをtrueに設定すると、必ず日付が明日に設定される */
 	public boolean set(int requestCode, int hour, int minute, boolean tomorrow, int dowBits){
 		Intent intent = new Intent(mContext, AlarmReceiver.class);
 		intent.putExtra(AlarmReceiver.EXTRA_REQUEST_CODE, requestCode);

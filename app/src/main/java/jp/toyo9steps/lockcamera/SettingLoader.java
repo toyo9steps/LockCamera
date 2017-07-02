@@ -17,17 +17,17 @@ public class SettingLoader {
 	private static final String KEY_START_TIME_MINUTE = "KEY_START_TIME_MINUTE";
 	private static final String KEY_END_TIME_HOUR = "KEY_END_TIME_HOUR";
 	private static final String KEY_END_TIME_MINUTE = "KEY_END_TIME_MINUTE";
-	private static final String KEY_TIMER_DOW = "KEY_TIMER_DOW";
+	private static final String KEY_TIMER_DOW_BITS = "KEY_TIMER_DOW_BITS";
 	public static final int SETTING_MODE_MANUAL = 0;
 	public static final int SETTING_MODE_TIMER = 1;
-	public static final int TIMER_DOW_SUNDAY = 0x0001;
-	public static final int TIMER_DOW_MONDAY = 0x0002;
-	public static final int TIMER_DOW_TUESDAY = 0x0004;
-	public static final int TIMER_DOW_WEDNESDAY = 0x0008;
-	public static final int TIMER_DOW_THURSDAY = 0x0010;
-	public static final int TIMER_DOW_FRYDAY = 0x0020;
-	public static final int TIMER_DOW_SATURDAY = 0x0040;
-	public static final int TIMER_DOW_EVERYDAY = 0x007F;
+	public static final int TIMER_DOW_BITS_SUNDAY = 0x0001 << 0;
+	public static final int TIMER_DOW_BITS_MONDAY = 0x0001 << 1;
+	public static final int TIMER_DOW_BITS_TUESDAY = 0x0001 << 2;
+	public static final int TIMER_DOW_BITS_WEDNESDAY = 0x0001 << 3;
+	public static final int TIMER_DOW_BITS_THURSDAY = 0x0001 << 4;
+	public static final int TIMER_DOW_BITS_FRIDAY = 0x0001 << 5;
+	public static final int TIMER_DOW_BITS_SATURDAY = 0x0001 << 6;
+	public static final int TIMER_DOW_BITS_EVERYDAY = 0xFFFF;
 
     private SharedPreferences mPrefs;
 	public int settingMode;
@@ -35,7 +35,7 @@ public class SettingLoader {
     public int startTimeMinute;
     public int endTimeHour;
     public int endTimeMinute;
-	public int timerDow;
+	public int timerDowBits;
 
     public SettingLoader(Context context) {
         mPrefs = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
@@ -44,7 +44,7 @@ public class SettingLoader {
         startTimeMinute = mPrefs.getInt(KEY_START_TIME_MINUTE, -1);
         endTimeHour = mPrefs.getInt(KEY_END_TIME_HOUR, -1);
         endTimeMinute = mPrefs.getInt(KEY_END_TIME_MINUTE, -1);
-		timerDow = mPrefs.getInt(KEY_TIMER_DOW, TIMER_DOW_EVERYDAY);
+		timerDowBits = mPrefs.getInt(KEY_TIMER_DOW_BITS, TIMER_DOW_BITS_EVERYDAY);
 	}
 
 	public void saveSettingMode(int mode) {
@@ -75,9 +75,9 @@ public class SettingLoader {
     }
 
 	public void saveTimerDow(int dowBits){
-		timerDow = dowBits;
+		timerDowBits = dowBits;
 		Editor editor = mPrefs.edit();
-		editor.putInt(KEY_TIMER_DOW, dowBits);
+		editor.putInt(KEY_TIMER_DOW_BITS, dowBits);
 		editor.apply();
 	}
 

@@ -69,13 +69,13 @@ public class MainActivity extends AppCompatActivity
 		for(ToggleButton toggleDow : mToggleDows){
 			toggleDow.setOnCheckedChangeListener(this);
 		}
-		mToggleDows[DOW_INDEX_SUNDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_SUNDAY) != 0);
-		mToggleDows[DOW_INDEX_MONDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_MONDAY) != 0);
-		mToggleDows[DOW_INDEX_TUESDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_TUESDAY) != 0);
-		mToggleDows[DOW_INDEX_WEDNESDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_WEDNESDAY) != 0);
-		mToggleDows[DOW_INDEX_THURSDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_THURSDAY) != 0);
-		mToggleDows[DOW_INDEX_FRIDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_FRYDAY) != 0);
-		mToggleDows[DOW_INDEX_SATURDAY].setChecked((mSettings.timerDow & SettingLoader.TIMER_DOW_SATURDAY) != 0);
+		mToggleDows[DOW_INDEX_SUNDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_SUNDAY) != 0);
+		mToggleDows[DOW_INDEX_MONDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_MONDAY) != 0);
+		mToggleDows[DOW_INDEX_TUESDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_TUESDAY) != 0);
+		mToggleDows[DOW_INDEX_WEDNESDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_WEDNESDAY) != 0);
+		mToggleDows[DOW_INDEX_THURSDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_THURSDAY) != 0);
+		mToggleDows[DOW_INDEX_FRIDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_FRIDAY) != 0);
+		mToggleDows[DOW_INDEX_SATURDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_SATURDAY) != 0);
 
 
 		if(mCameraManager.isAdminActive()){
@@ -168,10 +168,10 @@ public class MainActivity extends AppCompatActivity
 			if(mToggleDows[i] == buttonView){
 				int bitVal = 0x0001 << i;
 				if(isChecked){
-					mSettings.saveTimerDow(mSettings.timerDow | bitVal);
+					mSettings.saveTimerDow(mSettings.timerDowBits | bitVal);
 				}
 				else{
-					mSettings.saveTimerDow(mSettings.timerDow & ~bitVal);
+					mSettings.saveTimerDow(mSettings.timerDowBits & ~bitVal);
 				}
 			}
 		}
@@ -231,15 +231,15 @@ public class MainActivity extends AppCompatActivity
 		}
 
 		/* タイマーを設定すると同時に、タイマーが明日に設定された否かを取得する */
-		boolean startTommorow = timer.set(AlarmReceiver.REQUEST_DISABLE_START_TIME, settings.startTimeHour, settings.startTimeMinute, settings.timerDow);
-		boolean endTommorow = timer.set(AlarmReceiver.REQUEST_DISABLE_END_TIME, settings.endTimeHour, settings.endTimeMinute, settings.timerDow);
+		boolean startTomorrow = timer.set(AlarmReceiver.REQUEST_DISABLE_START_TIME, settings.startTimeHour, settings.startTimeMinute, settings.timerDowBits);
+		boolean endTomorrow = timer.set(AlarmReceiver.REQUEST_DISABLE_END_TIME, settings.endTimeHour, settings.endTimeMinute, settings.timerDowBits);
 
 		/* 今日の曜日を確認してカメラの無効有効を切り替える */
 		Calendar today = Calendar.getInstance();
 		int todayDowBit = SettingLoader.calendarDowToDowBit(today.get(Calendar.DAY_OF_WEEK));
 
 		/* 現在時刻が開始時刻よりも遅く、終了時刻よりも前ならば即座にカメラを無効化する */
-		if(startTommorow && !endTommorow && (settings.timerDow & todayDowBit) != 0){
+		if(startTomorrow && !endTomorrow && (settings.timerDowBits & todayDowBit) != 0){
 			cameraManager.setDisabled(true);
 		}
 	}
