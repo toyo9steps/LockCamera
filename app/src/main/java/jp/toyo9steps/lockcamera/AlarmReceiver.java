@@ -30,7 +30,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         int request = intent.getIntExtra(EXTRA_REQUEST_CODE, REQUEST_DISABLE_START_TIME);
 		int hour = intent.getIntExtra(EXTRA_TIME_HOUR, -1);
 		int minute = intent.getIntExtra(EXTRA_TIME_MINUTE, -1);
-		int dowBits = intent.getIntExtra(EXTRA_TIME_DOW_BITS, SettingLoader.TIMER_DOW_EVERYDAY);
+		int dowBits = intent.getIntExtra(EXTRA_TIME_DOW_BITS, SettingLoader.TIMER_DOW_BITS_EVERYDAY);
 		if(hour < 0 || minute < 0){
 			return;
 		}
