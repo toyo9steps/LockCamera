@@ -13,6 +13,7 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.ToggleButton;
 
+import java.util.Calendar;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
@@ -230,11 +231,15 @@ public class MainActivity extends AppCompatActivity
 		}
 
 		/* タイマーを設定すると同時に、タイマーが明日に設定された否かを取得する */
-		boolean startTommorow = timer.set(AlarmReceiver.REQUEST_DISABLE_START_TIME, settings.startTimeHour, settings.startTimeMinute);
-		boolean endTommorow = timer.set(AlarmReceiver.REQUEST_DISABLE_END_TIME, settings.endTimeHour, settings.endTimeMinute);
+		boolean startTommorow = timer.set(AlarmReceiver.REQUEST_DISABLE_START_TIME, settings.startTimeHour, settings.startTimeMinute, settings.timerDow);
+		boolean endTommorow = timer.set(AlarmReceiver.REQUEST_DISABLE_END_TIME, settings.endTimeHour, settings.endTimeMinute, settings.timerDow);
+
+		/* 今日の曜日を確認してカメラの無効有効を切り替える */
+		Calendar today = Calendar.getInstance();
+		int todayDowBit = SettingLoader.calendarDowToDowBit(today.get(Calendar.DAY_OF_WEEK));
 
 		/* 現在時刻が開始時刻よりも遅く、終了時刻よりも前ならば即座にカメラを無効化する */
-		if(startTommorow && !endTommorow){
+		if(startTommorow && !endTommorow && (settings.timerDow & todayDowBit) != 0){
 			cameraManager.setDisabled(true);
 		}
 	}

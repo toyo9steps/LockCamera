@@ -41,16 +41,17 @@ public class PreciseTimer {
 		mAlarm.cancel(operation);
 	}
 
-	public boolean set(int requestCode, int hour, int minute){
-		return set(requestCode, hour, minute, false);
+	public boolean set(int requestCode, int hour, int minute, int dowBits){
+		return set(requestCode, hour, minute, false, dowBits);
 	}
 
 	/* フラグtommorowをtrueに設定すると、必ず日付が明日に設定される */
-	public boolean set(int requestCode, int hour, int minute, boolean tomorrow){
+	public boolean set(int requestCode, int hour, int minute, boolean tomorrow, int dowBits){
 		Intent intent = new Intent(mContext, AlarmReceiver.class);
 		intent.putExtra(AlarmReceiver.EXTRA_REQUEST_CODE, requestCode);
 		intent.putExtra(AlarmReceiver.EXTRA_TIME_HOUR, hour);
 		intent.putExtra(AlarmReceiver.EXTRA_TIME_MINUTE, minute);
+		intent.putExtra(AlarmReceiver.EXTRA_TIME_DOW_BITS, dowBits);
 		PendingIntent pending = PendingIntent.getBroadcast(mContext, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 		Calendar calendar = Calendar.getInstance();
 		long todayMillis = calendar.getTimeInMillis();

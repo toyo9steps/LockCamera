@@ -80,4 +80,10 @@ public class SettingLoader {
 		editor.putInt(KEY_TIMER_DOW, dowBits);
 		editor.apply();
 	}
+
+	/* Calendarの曜日をdowBitに変換する */
+	public static int calendarDowToDowBit(int calendarDow){
+		/* Calendarの曜日は1-indexなので1を引くことに注意 */
+		return 0x0001 << (calendarDow - 1);
+	}
 }
