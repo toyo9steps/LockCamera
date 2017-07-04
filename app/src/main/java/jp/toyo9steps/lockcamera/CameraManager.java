@@ -64,7 +64,6 @@ public class CameraManager{
 		Notification notification = builder.getNotification();
 		notification.flags |= Notification.FLAG_ONGOING_EVENT;
 		NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-		manager.cancelAll();
 		manager.notify(NOTIFICATION_ID, notification);
 	}
 
