@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity
 			if(checkRadio){
 				mRadioGroup.check(R.id.radioTimeer);
 			}
-			setRepeatingAlarms(mSettings, mTimer, mCameraManager);
+			setRepeatingAlarms();/* システムにアラームを登録 */
 			mButtonStartTime.setEnabled(true);
 			mButtonEndTime.setEnabled(true);
 			for(ToggleButton toggleDow : mToggleDows){
@@ -173,6 +173,9 @@ public class MainActivity extends AppCompatActivity
 				else{
 					mSettings.saveTimerDow(mSettings.timerDowBits & ~bitVal);
 				}
+				/* 即座にカメラの有効無効状態に反映する */
+				setRepeatingAlarms();
+				break;
 			}
 		}
 	}
@@ -205,7 +208,7 @@ public class MainActivity extends AppCompatActivity
 		mSettings.saveStartTime(hour, minute);
 		setTimeButtonText(mButtonStartTime, hour, minute);
 		if(mSettings.settingMode == SettingLoader.SETTING_MODE_TIMER){
-			setRepeatingAlarms(mSettings, mTimer, mCameraManager);/* システムにアラームを登録 */
+			setRepeatingAlarms();/* システムにアラームを登録 */
 		}
 	}
 
@@ -217,12 +220,17 @@ public class MainActivity extends AppCompatActivity
 		mSettings.saveEndTime(hour, minute);
 		setTimeButtonText(mButtonEndTime, hour, minute);
 		if(mSettings.settingMode == SettingLoader.SETTING_MODE_TIMER){
-			setRepeatingAlarms(mSettings, mTimer, mCameraManager);/* システムにアラームを登録 */
+			setRepeatingAlarms();/* システムにアラームを登録 */
 		}
 	}
 
 	private void setTimeButtonText(Button button, int hour, int minute) {
 		button.setText(String.format(Locale.JAPAN, "%02d", hour) + ":" + String.format(Locale.JAPAN, "%02d", minute));
+	}
+
+	/* 現在の設定値でアラームを設定する */
+	private void setRepeatingAlarms(){
+		setRepeatingAlarms(mSettings, mTimer, mCameraManager);
 	}
 
 	public static void setRepeatingAlarms(SettingLoader settings, PreciseTimer timer, CameraManager cameraManager) {
@@ -239,9 +247,8 @@ public class MainActivity extends AppCompatActivity
 		int todayDowBit = SettingLoader.calendarDowToDowBit(today.get(Calendar.DAY_OF_WEEK));
 
 		/* 現在時刻が開始時刻よりも遅く、終了時刻よりも前ならば即座にカメラを無効化する */
-		if(startTomorrow && !endTomorrow && (settings.timerDowBits & todayDowBit) != 0){
-			cameraManager.setDisabled(true);
-		}
+		boolean enabled = startTomorrow && !endTomorrow && (settings.timerDowBits & todayDowBit) != 0;
+		cameraManager.setDisabled(enabled);
 	}
 
 	private void clearRepeatingAlarms() {
