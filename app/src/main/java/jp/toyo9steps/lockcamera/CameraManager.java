@@ -60,7 +60,7 @@ public class CameraManager{
 		builder.setContentText("カメラ無効中です");
 		builder.setContentIntent(pending);
 		builder.setWhen(System.currentTimeMillis());
-		builder.setSmallIcon(R.mipmap.ic_launcher);
+		builder.setSmallIcon(R.mipmap.notification);
 		Notification notification = builder.getNotification();
 		notification.flags |= Notification.FLAG_ONGOING_EVENT;
 		NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
