@@ -19,13 +19,6 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity
 		implements CompoundButton.OnCheckedChangeListener, RadioGroup.OnCheckedChangeListener, OnClickListener{
 
-	private static final int DOW_INDEX_SUNDAY = 0;
-	private static final int DOW_INDEX_MONDAY = 1;
-	private static final int DOW_INDEX_TUESDAY = 2;
-	private static final int DOW_INDEX_WEDNESDAY = 3;
-	private static final int DOW_INDEX_THURSDAY = 4;
-	private static final int DOW_INDEX_FRIDAY = 5;
-	private static final int DOW_INDEX_SATURDAY = 6;
 	private Switch mSwitchDisable;
 	private CameraManager mCameraManager;
 	private PreciseTimer mTimer;
@@ -59,24 +52,15 @@ public class MainActivity extends AppCompatActivity
 		setDisableEndTime(mSettings.endTimeHour, mSettings.endTimeMinute);
 
 		mToggleDows = new ToggleButton[7];
-		mToggleDows[DOW_INDEX_SUNDAY] = (ToggleButton) findViewById(R.id.toggleSunday);
-		mToggleDows[DOW_INDEX_MONDAY] = (ToggleButton) findViewById(R.id.toggleMonday);
-		mToggleDows[DOW_INDEX_TUESDAY] = (ToggleButton) findViewById(R.id.toggleTuesday);
-		mToggleDows[DOW_INDEX_WEDNESDAY] = (ToggleButton) findViewById(R.id.toggleWednesday);
-		mToggleDows[DOW_INDEX_THURSDAY] = (ToggleButton) findViewById(R.id.toggleThursday);
-		mToggleDows[DOW_INDEX_FRIDAY] = (ToggleButton) findViewById(R.id.toggleFriday);
-		mToggleDows[DOW_INDEX_SATURDAY] = (ToggleButton) findViewById(R.id.toggleSaturday);
-		for(ToggleButton toggleDow : mToggleDows){
-			toggleDow.setOnCheckedChangeListener(this);
+		int[] toggleDowIds = new int[]{R.id.toggleSunday, R.id.toggleMonday, R.id.toggleTuesday,
+				R.id.toggleWednesday, R.id.toggleThursday, R.id.toggleFriday, R.id.toggleSaturday};
+		int dowBit = SettingLoader.TIMER_DOW_BITS_SUNDAY;
+		for(int i = 0; i < mToggleDows.length; i++){
+			mToggleDows[i] = (ToggleButton) findViewById(toggleDowIds[i]);
+			mToggleDows[i].setOnCheckedChangeListener(this);
+			mToggleDows[i].setChecked((mSettings.timerDowBits & dowBit) != 0);
+			dowBit <<= 1;
 		}
-		mToggleDows[DOW_INDEX_SUNDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_SUNDAY) != 0);
-		mToggleDows[DOW_INDEX_MONDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_MONDAY) != 0);
-		mToggleDows[DOW_INDEX_TUESDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_TUESDAY) != 0);
-		mToggleDows[DOW_INDEX_WEDNESDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_WEDNESDAY) != 0);
-		mToggleDows[DOW_INDEX_THURSDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_THURSDAY) != 0);
-		mToggleDows[DOW_INDEX_FRIDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_FRIDAY) != 0);
-		mToggleDows[DOW_INDEX_SATURDAY].setChecked((mSettings.timerDowBits & SettingLoader.TIMER_DOW_BITS_SATURDAY) != 0);
-
 
 		if(mCameraManager.isAdminActive()){
 			setRadioButtonItems(mSettings.settingMode, true);
