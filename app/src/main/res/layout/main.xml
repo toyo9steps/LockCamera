@@ -11,7 +11,7 @@
 	<RadioGroup
 		android:id="@+id/radioGroup"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent">
+		android:layout_height="wrap_content">
 
 		<RadioButton
 			android:id="@+id/radioManual"
@@ -65,7 +65,7 @@
 
 		<LinearLayout
 			android:layout_width="match_parent"
-			android:layout_height="match_parent"
+			android:layout_height="wrap_content"
 			android:layout_marginLeft="20dp"
 			android:layout_marginTop="10dp"
 			android:orientation="horizontal">
@@ -136,5 +136,17 @@
 		</LinearLayout>
 
 	</RadioGroup>
+
+	<Space
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:layout_weight="1"/>
+
+	<CheckBox
+		android:id="@+id/checkNotification"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="カメラ無効時に通知を表示する"
+		android:enabled="false"/>
 
 </LinearLayout>

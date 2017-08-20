@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 import android.widget.Switch;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity
 	private Button mButtonStartTime;
 	private Button mButtonEndTime;
 	private ToggleButton[] mToggleDows;
+	private CheckBox mCheckNotification;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
@@ -61,6 +63,10 @@ public class MainActivity extends AppCompatActivity
 			mToggleDows[i].setChecked((mSettings.timerDowBits & dowBit) != 0);
 			dowBit <<= 1;
 		}
+
+		mCheckNotification = (CheckBox) findViewById(R.id.checkNotification);
+		mCheckNotification.setOnCheckedChangeListener(this);
+		mCheckNotification.setChecked(mSettings.showNotification);
 
 		if(mCameraManager.isAdminActive()){
 			setRadioButtonItems(mSettings.settingMode, true);
@@ -104,7 +110,7 @@ public class MainActivity extends AppCompatActivity
 		}
 		else{
 			mSwitchDisable.setEnabled(false);
-			mCameraManager.setDisabled(false);
+			mCameraManager.setDisabled(false, mSettings.showNotification);
 			/* setCheckedでリスナーが呼ばれてしまうので、リスナーを一旦解除する */
 			mSwitchDisable.setOnCheckedChangeListener(null);
 			mSwitchDisable.setChecked(false);
@@ -130,6 +136,7 @@ public class MainActivity extends AppCompatActivity
 				toggleDow.setEnabled(false);
 			}
 		}
+		mCheckNotification.setEnabled(true);
 	}
 
 	@Override
@@ -146,7 +153,11 @@ public class MainActivity extends AppCompatActivity
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
 		if (buttonView == mSwitchDisable) {
-			mCameraManager.setDisabled(isChecked);
+			mCameraManager.setDisabled(isChecked, mSettings.showNotification);
+		}
+		else if(buttonView == mCheckNotification){
+			mSettings.saveShowNotification(isChecked);
+			mCameraManager.updateNotificationSetting(isChecked);
 		}
 		for(int i = 0; i < mToggleDows.length; i++){
 			if(mToggleDows[i] == buttonView){
@@ -223,8 +234,8 @@ public class MainActivity extends AppCompatActivity
 		}
 
 		/* タイマーを設定すると同時に、タイマーが明日に設定された否かを取得する */
-		boolean startTomorrow = timer.set(AlarmReceiver.REQUEST_DISABLE_START_TIME, settings.startTimeHour, settings.startTimeMinute, settings.timerDowBits);
-		boolean endTomorrow = timer.set(AlarmReceiver.REQUEST_DISABLE_END_TIME, settings.endTimeHour, settings.endTimeMinute, settings.timerDowBits);
+		boolean startTomorrow = timer.set(AlarmReceiver.REQUEST_DISABLE_START_TIME, settings.startTimeHour, settings.startTimeMinute);
+		boolean endTomorrow = timer.set(AlarmReceiver.REQUEST_DISABLE_END_TIME, settings.endTimeHour, settings.endTimeMinute);
 
 		/* 今日の曜日を確認してカメラの無効有効を切り替える */
 		Calendar today = Calendar.getInstance();
@@ -232,7 +243,7 @@ public class MainActivity extends AppCompatActivity
 
 		/* 現在時刻が開始時刻よりも遅く、終了時刻よりも前ならば即座にカメラを無効化する */
 		boolean enabled = startTomorrow && !endTomorrow && (settings.timerDowBits & todayDowBit) != 0;
-		cameraManager.setDisabled(enabled);
+		cameraManager.setDisabled(enabled, settings.showNotification);
 	}
 
 	private void clearRepeatingAlarms() {

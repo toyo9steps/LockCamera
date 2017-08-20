@@ -38,13 +38,13 @@ public class CameraManager{
 		return mPolicyManager.getCameraDisabled(mAdminReceiver);
 	}
 
-	public void setDisabled(boolean disabled){
+	public void setDisabled(boolean disabled, boolean showNotif){
 		/* 権限をチェックしてからカメラを無効化する */
 		if(!isAdminActive()){
 			return;
 		}
 		mPolicyManager.setCameraDisabled(mAdminReceiver, disabled);
-		if(disabled){
+		if(disabled && showNotif){
 			showNotification(mContext);
 		}
 		else{
@@ -70,5 +70,18 @@ public class CameraManager{
 	private void hideNotification(Context context) {
 		NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		manager.cancelAll();
+	}
+
+	public void updateNotificationSetting(boolean showNotif){
+		if(!isAdminActive()){
+			return;
+		}
+		boolean disabled = mPolicyManager.getCameraDisabled(mAdminReceiver);
+		if(disabled && showNotif){
+			showNotification(mContext);
+		}
+		else{
+			hideNotification(mContext);
+		}
 	}
 }

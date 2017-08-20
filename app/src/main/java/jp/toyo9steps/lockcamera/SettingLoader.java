@@ -18,6 +18,7 @@ public class SettingLoader {
 	private static final String KEY_END_TIME_HOUR = "KEY_END_TIME_HOUR";
 	private static final String KEY_END_TIME_MINUTE = "KEY_END_TIME_MINUTE";
 	private static final String KEY_TIMER_DOW_BITS = "KEY_TIMER_DOW_BITS";
+	private static final String KEY_SHOW_NOTIFICATION = "KEY_SHOW_NOTIFICATION";
 	public static final int SETTING_MODE_MANUAL = 0;
 	public static final int SETTING_MODE_TIMER = 1;
 	public static final int TIMER_DOW_BITS_SUNDAY = 0x0001 << 0;
@@ -36,6 +37,7 @@ public class SettingLoader {
     public int endTimeHour;
     public int endTimeMinute;
 	public int timerDowBits;
+	public boolean showNotification;
 
     public SettingLoader(Context context) {
         mPrefs = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE);
@@ -45,6 +47,7 @@ public class SettingLoader {
         endTimeHour = mPrefs.getInt(KEY_END_TIME_HOUR, -1);
         endTimeMinute = mPrefs.getInt(KEY_END_TIME_MINUTE, -1);
 		timerDowBits = mPrefs.getInt(KEY_TIMER_DOW_BITS, TIMER_DOW_BITS_EVERYDAY);
+		showNotification = mPrefs.getBoolean(KEY_SHOW_NOTIFICATION, true);
 	}
 
 	public void saveSettingMode(int mode) {
@@ -85,5 +88,12 @@ public class SettingLoader {
 	public static int calendarDowToDowBit(int calendarDow){
 		/* Calendarの曜日は1-indexなので1を引くことに注意 */
 		return 0x0001 << (calendarDow - 1);
+	}
+
+	public void saveShowNotification(boolean show){
+		showNotification = show;
+		Editor editor = mPrefs.edit();
+		editor.putBoolean(KEY_SHOW_NOTIFICATION, show);
+		editor.apply();
 	}
 }
